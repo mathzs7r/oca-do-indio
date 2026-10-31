@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<title>Entrar: Oca do Índio</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/auth.css">
+</head>
+<body>
+
+<section class="tela-auth">
+  <div class="cartao-auth">
+    <a href="admin-login.html" class="cocar-link" aria-label="Acesso exclusivo" title="Acesso exclusivo">
+    <svg class="cocar" viewBox="0 0 120 90" aria-hidden="true">
+      <g stroke="#241a10" stroke-width="2">
+        <path d="M60 78 Q30 70 22 40" fill="none"/>
+        <path d="M60 78 Q90 70 98 40" fill="none"/>
+        <g fill="#c23b22"><path d="M22 40 Q14 20 20 8 Q28 20 26 40 Z"/><path d="M98 40 Q106 20 100 8 Q92 20 94 40 Z"/></g>
+        <g fill="#e8a33d"><path d="M30 44 Q18 26 24 12 Q34 26 34 44 Z"/><path d="M90 44 Q102 26 96 12 Q86 26 86 44 Z"/></g>
+        <g fill="#f5ead0"><path d="M42 52 Q32 34 40 22 Q50 36 50 52 Z"/><path d="M78 52 Q88 34 80 22 Q70 36 70 52 Z"/></g>
+        <g fill="#3e6b35"><path d="M52 58 Q46 40 54 30 Q62 42 60 58 Z"/><path d="M68 58 Q74 40 66 30 Q58 42 60 58 Z"/></g>
+        <rect x="40" y="72" width="40" height="12" rx="6" fill="#241a10"/>
+        <rect x="44" y="75" width="32" height="6" rx="3" fill="#c23b22"/>
+      </g>
+    </svg>
+    </a>
+
+    <h1>Bem-vindo à Oca!</h1>
+    <p class="slogan-auth">Entre pra pedir os sabores da floresta</p>
+
+    <p id="msg-ok" class="msg-ok" hidden></p>
+    <form id="form-login">
+      <label for="telefone">Telefone</label>
+      <input type="tel" id="telefone" placeholder="(42) 99999-9999" required autocomplete="tel">
+
+      <label for="senha">Senha</label>
+      <input type="password" id="senha" placeholder="Sua senha" required autocomplete="current-password">
+
+      <button type="submit" class="btn-auth">Entrar</button>
+    </form>
+
+    <p id="msg-erro" class="msg-erro" hidden></p>
+
+    <p class="alternar-auth">
+      Ainda não tem conta?
+      <a href="cadastro.html">Cadastrar</a>
+    </p>
+  </div>
+</section>
+
+<script src="js/auth.js"></script>
+<script src="js/login.js"></script>
+</body>
+</html>

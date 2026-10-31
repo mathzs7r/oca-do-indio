@@ -1,0 +1,20 @@
+{
+  "name": "oca-do-indio-backend",
+  "version": "1.0.0",
+  "description": "API do site Oca do Índio — login, cardápio, carrinho e agendamento de retirada",
+  "main": "server.js",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "start": "node --env-file-if-exists=.env server.js",
+    "dev": "node --env-file-if-exists=.env --watch server.js",
+    "teste": "node --env-file-if-exists=.env scripts/teste-smoke.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "better-sqlite3": "^12.4.1",
+    "cookie-parser": "^1.4.7",
+    "express": "^5.1.0"
+  }
+}

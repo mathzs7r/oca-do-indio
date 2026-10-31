@@ -1,0 +1,23 @@
+# Deploy no Render (Blueprint)
+# Banco SQLite + Node em um único serviço web.
+# Configure no painel do Render:
+#   ADMIN_USUARIO e ADMIN_SENHA (o restante já está aqui)
+services:
+  - type: web
+    name: oca-do-indio
+    runtime: node
+    plan: free
+    rootDir: backend
+    buildCommand: npm ci
+    startCommand: npm start
+    envVars:
+      - key: NODE_VERSION
+        value: "22.20.0"
+      - key: NODE_ENV
+        value: production
+      - key: NPM_CONFIG_FUND
+        value: "false"
+      - key: ADMIN_USUARIO
+        sync: false
+      - key: ADMIN_SENHA
+        sync: false

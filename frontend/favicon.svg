@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- fundo redondo verde mata -->
+  <circle cx="32" cy="32" r="30" fill="#3e6b35"/>
+  <!-- oca -->
+  <path d="M32 12 L14 52 L50 52 Z" fill="#c8a15c" stroke="#241a10" stroke-width="3" stroke-linejoin="round"/>
+  <!-- palha do telhado -->
+  <path d="M32 12 L22 52 M32 12 L32 52 M32 12 L42 52" stroke="#8a6a34" stroke-width="2.6" fill="none"/>
+  <!-- faixa de grafismo -->
+  <path d="M19 45 H45" stroke="#c23b22" stroke-width="4"/>
+  <!-- porta -->
+  <path d="M32 32 L26.5 52 L37.5 52 Z" fill="#241a10"/>
+  <!-- fumaça -->
+  <path d="M38 20 q6 -7 2 -14 q10 8 3 15" fill="none" stroke="#f5ead0" stroke-width="3.4" stroke-linecap="round"/>
+</svg>

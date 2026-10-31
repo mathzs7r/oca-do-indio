@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<title>Painel da Oca: Área restrita</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+
+<header id="topo-painel">
+  <h1>Painel da Oca</h1>
+  <div class="info-topo">
+    <span id="saudacao-admin"></span>
+    <button id="btn-sair" class="btn-mini">Sair</button>
+  </div>
+</header>
+
+<main id="painel">
+  <section class="barra-filtros">
+    <h2>Pedidos</h2>
+    <div class="filtros">
+      <select id="filtro-status">
+        <option value="">Todos</option>
+        <option value="aberto">Aberto</option>
+        <option value="confirmado">Confirmado</option>
+        <option value="pronto">Pronto</option>
+        <option value="retirado">Retirado</option>
+        <option value="cancelado">Cancelado</option>
+      </select>
+      <button id="btn-atualizar" class="btn-mini">↻ Atualizar</button>
+    </div>
+  </section>
+
+  <div id="lista-pedidos"></div>
+</main>
+
+<footer>
+  <p class="assinatura">Painel exclusivo da tribo</p>
+</footer>
+
+<script src="js/admin.js"></script>
+</body>
+</html>

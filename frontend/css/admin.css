@@ -1,0 +1,88 @@
+/* ---------- PAINEL DO ADMINISTRADOR (acesso restrito) ---------- */
+#topo-painel{
+  background:var(--mata-escuro);
+  color:var(--palha-clara);
+  padding:16px 20px;
+  display:flex;align-items:center;justify-content:space-between;gap:14px;
+  border-bottom:4px solid var(--madeira);
+}
+#topo-painel h1{font-family:var(--fonte-titulo);font-size:1.5rem}
+.info-topo{display:flex;align-items:center;gap:12px}
+.info-topo span{font-size:1rem}
+
+#painel{max-width:900px;margin:0 auto;padding:24px 14px;flex:1;width:100%}
+
+/* secundário fica no rodapé da tela, mesmo sem pedidos */
+body{
+  min-height:100vh;
+  display:flex;flex-direction:column;
+}
+footer{margin-top:auto}
+.barra-filtros{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  flex-wrap:wrap;margin-bottom:16px;
+}
+.barra-filtros h2{font-family:var(--fonte-titulo);color:var(--mata-escuro);font-size:1.3rem}
+.filtros{display:flex;gap:8px}
+.filtros select{
+  font-family:var(--fonte-texto);font-size:1rem;
+  padding:8px 12px;border:3px solid var(--madeira);border-radius:12px;
+  background:#fffdf6;color:var(--genipapo);
+}
+
+.btn-mini{
+  font-family:var(--fonte-titulo);font-size:.9rem;
+  padding:7px 14px;border:2px solid var(--genipapo);
+  border-radius:30px;background:var(--urucum);color:var(--palha-clara);
+  cursor:pointer;transition:.15s;
+}
+.btn-mini:hover{transform:translateY(2px)}
+.btn-mini:disabled{
+  background:var(--madeira);color:var(--palha-clara);
+  cursor:default;opacity:.55;
+}
+.btn-mini.atual{box-shadow:0 0 0 3px rgba(194,59,34,.4)}
+
+.vazio{
+  text-align:center;padding:40px 0;color:var(--mata-escuro);opacity:.8;
+  font-size:1.2rem;
+}
+
+.pedido{
+  background:var(--palha-clara);
+  border:3px solid var(--madeira);
+  border-radius:14px;
+  box-shadow:0 4px 0 var(--madeira);
+  padding:16px 18px;
+  margin-bottom:16px;
+}
+.pedido-topo{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  border-bottom:2px dashed var(--madeira);padding-bottom:8px;
+}
+.pedido-topo .codigo{font-size:1.1rem;color:var(--mata-escuro)}
+.status{
+  font-size:.85rem;padding:3px 10px;border-radius:20px;margin-left:8px;
+  border:2px solid var(--madeira);
+}
+.st-aberto{background:#f7e8b5;color:#6b4e12}
+.st-confirmado{background:#d6e9c6;color:#2d5a2a}
+.st-pronto{background:#cfe3f5;color:#204a6b}
+.st-retirado{background:#e2e2e2;color:#4a4a4a}
+.st-cancelado{background:#f3c4bb;color:#7c2417}
+
+.cliente{margin-top:10px;color:var(--genipapo)}
+.itens{
+  margin-top:6px;font-size:1.02rem;line-height:1.6;color:var(--genipapo);
+  padding-left:4px;
+}
+.obs{
+  margin-top:8px;font-size:1rem;color:var(--urucum-escuro);
+  background:rgba(194,59,34,.08);border-radius:8px;padding:6px 10px;
+}
+.pedido-base{
+  margin-top:12px;display:flex;align-items:center;justify-content:space-between;
+  gap:10px;flex-wrap:wrap;
+}
+.pedido-base strong{font-size:1.15rem;color:var(--mata-escuro)}
+.acoes{display:flex;gap:6px;flex-wrap:wrap}
