@@ -10,6 +10,7 @@ const router = require('express').Router();
 const db = require('../db');
 const requireAuth = require('../middleware/requireAuth');
 const { validarRetirada } = require('../config');
+const { salvarBackupPedidos } = require('../backup');
 
 router.use(requireAuth);
 
@@ -52,6 +53,7 @@ function finalizaPedido(clienteId, tipo, retiradaEm, observacao, itens, carrinho
   });
 
   const pedidoId = tx();
+  salvarBackupPedidos(); // backup automático a cada pedido novo (não derruba a resposta se falhar)
   return detalhesDoPedido(pedidoId);
 }
 

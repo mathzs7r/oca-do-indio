@@ -45,6 +45,11 @@ function init() {
       db.exec("ALTER TABLE clientes ADD COLUMN senha_hash TEXT");
       console.log('Coluna senha_hash adicionada em clientes.');
     }
+    const colunasPedidos = db.prepare('PRAGMA table_info(pedidos)').all().map(c => c.name);
+    if (!colunasPedidos.includes('cliente_nome')) {
+      db.exec("ALTER TABLE pedidos ADD COLUMN cliente_nome TEXT");
+      console.log('Coluna cliente_nome adicionada em pedidos.');
+    }
     const temSessoes = db
       .prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='sessoes'")
       .get();

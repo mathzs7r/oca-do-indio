@@ -11,6 +11,10 @@ database/*.db
 database/*.db-shm
 database/*.db-wal
 
+# backup em JSON dos pedidos (gerado em tempo de execução)
+database/pedidos-backup.json
+database/pedidos-backup.json.tmp-*
+
 # logs
 *.log
 npm-debug.log*

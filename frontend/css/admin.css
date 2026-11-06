@@ -86,3 +86,25 @@ footer{margin-top:auto}
 }
 .pedido-base strong{font-size:1.15rem;color:var(--mata-escuro)}
 .acoes{display:flex;gap:6px;flex-wrap:wrap}
+
+/* ---------- NOVO PEDIDO ---------- */
+.novo-pedido{
+  background:var(--palha-clara);
+  border:3px solid var(--madeira);
+  border-radius:14px;
+  box-shadow:0 4px 0 var(--madeira);
+  padding:16px 18px;
+  margin-bottom:16px;
+}
+.novo-pedido h2{font-family:var(--fonte-titulo);color:var(--mata-escuro);font-size:1.2rem;margin-bottom:12px}
+.campo{display:flex;flex-direction:column;gap:4px;margin-bottom:12px}
+.campo label{font-weight:700;color:var(--mata-escuro)}
+.campo input,.campo select,.item-linha select,.item-linha input{
+  font-family:var(--fonte-texto);font-size:1rem;
+  padding:8px 12px;border:3px solid var(--madeira);border-radius:12px;
+  background:#fffdf6;color:var(--genipapo);
+}
+.item-linha{display:flex;gap:8px;margin-bottom:8px;align-items:center}
+.item-linha select{flex:1}
+.item-linha input{width:90px}
+.np-msg{margin:8px 0;color:var(--mata-escuro);font-weight:700;min-height:1.2em}

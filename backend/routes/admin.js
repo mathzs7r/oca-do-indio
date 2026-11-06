@@ -11,6 +11,8 @@ const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const db = require('../db');
 const requireAdmin = require('../middleware/requireAdmin');
+const { validarRetirada, horariosDaFeira } = require('../config');
+const { salvarBackupPedidos, gerarDadosBackup } = require('../backup');
 
 const COOKIE_ADMIN = {
   httpOnly: true,
@@ -96,6 +98,123 @@ router.post('/logout', requireAdmin, (req, res) => {
 // protegido daqui para baixo
 router.use(requireAdmin);
 
+// ---------- PRODUTOS (para o formulário de novo pedido) ----------
+router.get('/produtos', (_req, res) => {
+  const produtos = db
+    .prepare(`
+      SELECT p.id, p.codigo, p.nome, p.preco, c.nome AS categoria
+      FROM produtos p JOIN categorias c ON c.id = p.categoria_id
+      WHERE p.ativo = 1
+      ORDER BY c.id, p.nome
+    `)
+    .all();
+  res.json(produtos);
+});
+
+// ---------- HORÁRIOS DE RETIRADA DA FEIRA ----------
+router.get('/horarios', (_req, res) => {
+  res.json(horariosDaFeira());
+});
+
+// ---------- BACKUP EM JSON (todos os pedidos) ----------
+router.get('/pedidos/backup', (_req, res) => {
+  res.json(gerarDadosBackup());
+});
+
+// ---------- CADASTRAR PEDIDO MANUAL (só nome, sem cliente) ----------
+router.post('/pedidos', (req, res) => {
+  const { nome, retiradaEm, observacao, itens } = req.body || {};
+
+  const nomeFinal = String(nome || '').trim();
+  if (!nomeFinal || nomeFinal.length > 80) {
+    return res.status(400).json({ erro: 'Informe o nome (até 80 caracteres).' });
+  }
+
+  // retirada é opcional; se enviada, precisa ser um horário da feira
+  let retirada = null;
+  let tipo = 'carrinho';
+  if (retiradaEm) {
+    const checa = validarRetirada(retiradaEm);
+    if (!checa.ok) return res.status(400).json({ erro: checa.motivo });
+    retirada = checa.retirada;
+    tipo = 'agendado';
+  }
+
+  const obsFinal = observacao ? String(observacao).trim().slice(0, 500) || null : null;
+
+  if (!Array.isArray(itens) || !itens.length) {
+    return res.status(400).json({ erro: 'Adicione pelo menos um produto.' });
+  }
+
+  // resolve produtos no banco, junta repetidos e congela o preço atual
+  const resolvidos = new Map(); // produto_id -> { produto_id, quantidade, preco_unitario }
+  for (const item of itens) {
+    const produtoId = Number(item?.produtoId ?? item?.produto_id);
+    const qtd = Number(item?.quantidade);
+    if (!Number.isInteger(produtoId) || produtoId <= 0) {
+      return res.status(400).json({ erro: 'Produto inválido.' });
+    }
+    if (!Number.isInteger(qtd) || qtd < 1 || qtd > 999) {
+      return res.status(400).json({ erro: 'Quantidade de cada produto: de 1 a 999.' });
+    }
+    const produto = db
+      .prepare('SELECT id, codigo, nome, preco FROM produtos WHERE id = ? AND ativo = 1')
+      .get(produtoId);
+    if (!produto) {
+      return res.status(404).json({ erro: `Produto ${produtoId} não encontrado ou inativo.` });
+    }
+    const atual = resolvidos.get(produto.id) || {
+      produto_id: produto.id, quantidade: 0, preco_unitario: produto.preco,
+      codigo: produto.codigo, nome: produto.nome,
+    };
+    atual.quantidade += qtd;
+    resolvidos.set(produto.id, atual);
+  }
+
+  const itensResolvidos = [...resolvidos.values()];
+  const total = itensResolvidos.reduce((s, i) => s + i.quantidade * i.preco_unitario, 0);
+
+  const ano = new Date().getFullYear();
+  const n = db.prepare('SELECT COUNT(*) AS n FROM pedidos').get().n + 1;
+  const codigo = `OC-${ano}-${String(n).padStart(4, '0')}`;
+
+  const tx = db.transaction(() => {
+    const info = db
+      .prepare(`
+        INSERT INTO pedidos (codigo, cliente_id, cliente_nome, tipo, retirada_em, observacao, total)
+        VALUES (?, NULL, ?, ?, ?, ?, ?)
+      `)
+      .run(codigo, nomeFinal, tipo, retirada, obsFinal, total);
+
+    const insItem = db.prepare(`
+      INSERT INTO pedido_itens (pedido_id, produto_id, quantidade, preco_unitario)
+      VALUES (?, ?, ?, ?)
+    `);
+    for (const i of itensResolvidos) {
+      insItem.run(info.lastInsertRowid, i.produto_id, i.quantidade, i.preco_unitario);
+    }
+    db.prepare("INSERT INTO pedido_status_log (pedido_id, status) VALUES (?, 'aberto')")
+      .run(info.lastInsertRowid);
+
+    return info.lastInsertRowid;
+  });
+
+  const pedidoId = tx();
+  salvarBackupPedidos(); // backup automático (não derruba a resposta se falhar)
+
+  const pedidoCriado = db
+    .prepare('SELECT id, codigo, tipo, status, retirada_em, observacao, total, criado_em, cliente_nome FROM pedidos WHERE id = ?')
+    .get(pedidoId);
+
+  res.status(201).json({
+    ...pedidoCriado,
+    itens: itensResolvidos.map((i) => ({
+      produto_id: i.produto_id, quantidade: i.quantidade,
+      preco_unitario: i.preco_unitario, codigo: i.codigo, nome: i.nome,
+    })),
+  });
+});
+
 // ---------- LISTAR PEDIDOS ----------
 router.get('/pedidos', (req, res) => {
   const status = req.query.status;
@@ -105,7 +224,7 @@ router.get('/pedidos', (req, res) => {
     pedidos = db
       .prepare(`
         SELECT p.id, p.codigo, p.tipo, p.status, p.retirada_em, p.observacao, p.total,
-               p.criado_em, c.nome AS cliente, c.telefone
+               p.criado_em, p.cliente_nome, c.nome AS cliente, c.telefone
         FROM pedidos p LEFT JOIN clientes c ON c.id = p.cliente_id
         WHERE p.status = ?
         ORDER BY p.retirada_em IS NULL, p.retirada_em, p.id DESC
@@ -115,7 +234,7 @@ router.get('/pedidos', (req, res) => {
     pedidos = db
       .prepare(`
         SELECT p.id, p.codigo, p.tipo, p.status, p.retirada_em, p.observacao, p.total,
-               p.criado_em, c.nome AS cliente, c.telefone
+               p.criado_em, p.cliente_nome, c.nome AS cliente, c.telefone
         FROM pedidos p LEFT JOIN clientes c ON c.id = p.cliente_id
         ORDER BY p.status <> 'aberto', p.retirada_em IS NULL, p.retirada_em, p.id DESC
       `)
@@ -160,6 +279,7 @@ router.patch('/pedidos/:id/status', (req, res) => {
       .run(pedido.id, status);
   });
   tx();
+  salvarBackupPedidos(); // backup automático (não derruba a resposta se falhar)
 
   res.json({ ok: true, status });
 });

@@ -8,6 +8,8 @@ const express = require('express');
 const cookieParser = require('cookie-parser');
 
 const db = require('./db'); // cria/abre o banco e o administrador
+const { salvarBackupPedidos } = require('./backup');
+salvarBackupPedidos(); // garante um backup JSON atualizado na inicialização
 
 const app = express();
 const PRODUCAO = process.env.NODE_ENV === 'production';

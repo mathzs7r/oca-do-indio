@@ -33,7 +33,32 @@
         <option value="cancelado">Cancelado</option>
       </select>
       <button id="btn-atualizar" class="btn-mini">↻ Atualizar</button>
+      <button id="btn-backup" class="btn-mini">⬇ Backup JSON</button>
     </div>
+  </section>
+
+  <section class="novo-pedido">
+    <h2>Novo pedido</h2>
+    <form id="form-novo-pedido">
+      <div class="campo">
+        <label for="np-nome">Nome</label>
+        <input id="np-nome" type="text" maxlength="80" required placeholder="Nome do cliente">
+      </div>
+      <div class="campo">
+        <label for="np-retirada">Retirada (opcional)</label>
+        <select id="np-retirada">
+          <option value="">Sem retirada agendada</option>
+        </select>
+      </div>
+      <div id="np-itens"></div>
+      <button type="button" id="btn-add-item" class="btn-mini">+ Adicionar produto</button>
+      <div class="campo">
+        <label for="np-obs">Observação (opcional)</label>
+        <input id="np-obs" type="text" maxlength="500" placeholder="Ex.: tirar cebola">
+      </div>
+      <p id="np-msg" class="np-msg" role="status"></p>
+      <button type="submit" class="btn-mini">Cadastrar pedido</button>
+    </form>
   </section>
 
   <div id="lista-pedidos"></div>

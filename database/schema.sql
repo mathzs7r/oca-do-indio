@@ -61,6 +61,7 @@ CREATE TABLE pedidos (
   id             INTEGER PRIMARY KEY AUTOINCREMENT,
   codigo         TEXT    NOT NULL UNIQUE,    -- código do pedido exibido ao cliente
   cliente_id     INTEGER REFERENCES clientes(id),
+  cliente_nome   TEXT,                        -- nome avulso (pedido cadastrado pelo admin, sem cliente vinculado)
   tipo           TEXT    NOT NULL CHECK (tipo IN ('carrinho','agendado')),
   status         TEXT    NOT NULL DEFAULT 'aberto'
                  CHECK (status IN ('aberto','confirmado','pronto','retirado','cancelado')),
