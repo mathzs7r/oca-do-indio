@@ -67,6 +67,7 @@ CREATE TABLE pedidos (
                  CHECK (status IN ('aberto','confirmado','pronto','retirado','cancelado')),
   retirada_em    TEXT,                        -- data/hora agendada (tipo='agendado'); ex: '2026-10-31 10:00'
   observacao     TEXT,                        -- observações gerais da pessoa
+  forma_pagamento TEXT,                       -- 'Pix' | 'Dinheiro' | 'Cartão de débito' | 'Cartão de crédito' (null = pedidos antigos)
   total          REAL NOT NULL DEFAULT 0,     -- somatório dos itens
   criado_em      TEXT NOT NULL DEFAULT (datetime('now')),
   atualizado_em  TEXT NOT NULL DEFAULT (datetime('now'))

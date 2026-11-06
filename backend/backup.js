@@ -17,6 +17,7 @@ function gerarDadosBackup() {
   const pedidos = db
     .prepare(`
       SELECT p.id, p.codigo, p.tipo, p.status, p.retirada_em, p.observacao,
+             p.forma_pagamento,
              p.total, p.criado_em, p.atualizado_em, p.cliente_nome,
              c.nome AS cliente, c.telefone
       FROM pedidos p LEFT JOIN clientes c ON c.id = p.cliente_id

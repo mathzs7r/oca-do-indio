@@ -319,6 +319,12 @@ async function confirmarPedido() {
     msg.hidden = false;
     return;
   }
+  const formaPagamento = document.getElementById('forma-pagamento').value;
+  if (!formaPagamento) {
+    msg.textContent = 'Escolha a forma de pagamento.';
+    msg.hidden = false;
+    return;
+  }
 
   const btn = document.getElementById('btn-confirmar');
   btn.disabled = true;
@@ -329,6 +335,7 @@ async function confirmarPedido() {
       body: JSON.stringify({
         retiradaEm: slot,
         observacao: document.getElementById('obs-pedido').value.trim() || null,
+        formaPagamento,
       }),
     });
     const dados = await r.json();
@@ -363,7 +370,8 @@ function mostrarConfirmacao(pedido) {
     )
     .join('');
 
-  document.getElementById('conf-total').textContent = `Total: ${moeda(pedido.total)}`;
+  document.getElementById('conf-total').textContent =
+    `Total: ${moeda(pedido.total)}${pedido.forma_pagamento ? ` • Pagamento: ${pedido.forma_pagamento}` : ''}`;
 
   construirLinkZap(pedido, linhas);
   abre('overlay-confirm');

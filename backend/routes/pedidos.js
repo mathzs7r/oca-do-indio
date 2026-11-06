@@ -9,7 +9,7 @@
 const router = require('express').Router();
 const db = require('../db');
 const requireAuth = require('../middleware/requireAuth');
-const { validarRetirada } = require('../config');
+const { validarRetirada, validarFormaPagamento } = require('../config');
 const { salvarBackupPedidos } = require('../backup');
 
 router.use(requireAuth);
@@ -21,17 +21,17 @@ function novoCodigoPedido() {
 }
 
 // cria o pedido + itens + log do status, dentro de uma transação
-function finalizaPedido(clienteId, tipo, retiradaEm, observacao, itens, carrinhoId) {
+function finalizaPedido(clienteId, tipo, retiradaEm, observacao, itens, carrinhoId, formaPagamento) {
   const codigo = novoCodigoPedido();
   const total = itens.reduce((s, i) => s + i.quantidade * i.preco_unitario, 0);
 
   const tx = db.transaction(() => {
     const info = db
       .prepare(`
-        INSERT INTO pedidos (codigo, cliente_id, tipo, retirada_em, observacao, total)
-        VALUES (?, ?, ?, ?, ?, ?)
+        INSERT INTO pedidos (codigo, cliente_id, tipo, retirada_em, observacao, forma_pagamento, total)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
       `)
-      .run(codigo, clienteId, tipo, retiradaEm, observacao, total);
+      .run(codigo, clienteId, tipo, retiradaEm, observacao, formaPagamento, total);
 
     const insItem = db.prepare(`
       INSERT INTO pedido_itens (pedido_id, produto_id, quantidade, preco_unitario)
@@ -60,7 +60,7 @@ function finalizaPedido(clienteId, tipo, retiradaEm, observacao, itens, carrinho
 // detalhes completos do pedido (para a tela de confirmação)
 function detalhesDoPedido(pedidoId) {
   const pedido = db
-    .prepare('SELECT codigo, tipo, status, retirada_em, observacao, total FROM pedidos WHERE id = ?')
+    .prepare('SELECT codigo, tipo, status, retirada_em, observacao, forma_pagamento, total FROM pedidos WHERE id = ?')
     .get(pedidoId);
   pedido.itens = db
     .prepare(`
@@ -94,13 +94,17 @@ router.post('/', (req, res) => {
   const checa = validarRetirada(req.body?.retiradaEm);
   if (!checa.ok) return res.status(400).json({ erro: checa.motivo });
 
+  const pagamento = validarFormaPagamento(req.body?.formaPagamento);
+  if (!pagamento.ok) return res.status(400).json({ erro: pagamento.motivo });
+
   const detalhes = finalizaPedido(
     req.cliente.id,
     'agendado',
     checa.retirada,
     req.body?.observacao ?? null,
     itens,
-    carrinho.id
+    carrinho.id,
+    pagamento.forma
   );
 
   res.status(201).json(detalhes);
@@ -108,7 +112,7 @@ router.post('/', (req, res) => {
 
 // ---------- AGENDAR PELO CÓDIGO DO PRODUTO ----------
 router.post('/agendar', (req, res) => {
-  const { codigoProduto, quantidade, retiradaEm, observacao } = req.body || {};
+  const { codigoProduto, quantidade, retiradaEm, observacao, formaPagamento } = req.body || {};
   const qtd = Math.max(1, Number(quantidade) || 1);
 
   if (!codigoProduto) {
@@ -118,13 +122,16 @@ router.post('/agendar', (req, res) => {
   const checa = validarRetirada(retiradaEm);
   if (!checa.ok) return res.status(400).json({ erro: checa.motivo });
 
+  const pagamento = validarFormaPagamento(formaPagamento);
+  if (!pagamento.ok) return res.status(400).json({ erro: pagamento.motivo });
+
   const produto = db
     .prepare('SELECT id, preco FROM produtos WHERE codigo = ? COLLATE NOCASE AND ativo = 1')
     .get(String(codigoProduto).trim());
   if (!produto) return res.status(404).json({ erro: `Produto ${codigoProduto} não encontrado.` });
 
   const itens = [{ produto_id: produto.id, quantidade: qtd, preco_unitario: produto.preco }];
-  const detalhes = finalizaPedido(req.cliente.id, 'agendado', checa.retirada, observacao ?? null, itens);
+  const detalhes = finalizaPedido(req.cliente.id, 'agendado', checa.retirada, observacao ?? null, itens, null, pagamento.forma);
 
   res.status(201).json(detalhes);
 });
@@ -133,7 +140,7 @@ router.post('/agendar', (req, res) => {
 router.get('/me', (req, res) => {
   const pedidos = db
     .prepare(`
-      SELECT p.id, p.codigo, p.tipo, p.status, p.retirada_em, p.total, p.criado_em,
+      SELECT p.id, p.codigo, p.tipo, p.status, p.retirada_em, p.forma_pagamento, p.total, p.criado_em,
              (SELECT COUNT(*) FROM pedido_itens pi WHERE pi.pedido_id = p.id) AS itens
       FROM pedidos p
       WHERE p.cliente_id = ?

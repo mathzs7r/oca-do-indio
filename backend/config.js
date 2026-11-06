@@ -51,4 +51,15 @@ function validarRetirada(valor) {
   return { ok: true, retirada: texto };
 }
 
-module.exports = { FEIRA, WHATSAPP, horariosDaFeira, validarRetirada };
+// formas de pagamento aceitas (pedidos novos do admin e do cliente)
+const FORMAS_PAGAMENTO = ['Pix', 'Dinheiro', 'Cartão de débito', 'Cartão de crédito'];
+
+function validarFormaPagamento(valor) {
+  const forma = String(valor || '').trim();
+  if (!FORMAS_PAGAMENTO.includes(forma)) {
+    return { ok: false, motivo: 'Escolha a forma de pagamento.' };
+  }
+  return { ok: true, forma };
+}
+
+module.exports = { FEIRA, WHATSAPP, horariosDaFeira, validarRetirada, FORMAS_PAGAMENTO, validarFormaPagamento };

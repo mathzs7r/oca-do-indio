@@ -69,6 +69,7 @@ async function carregarPedidos() {
         </div>
 
         ${p.observacao ? `<p class="obs">Observação: ${p.observacao}</p>` : ''}
+        <p class="pagamento">💳 ${p.forma_pagamento || '—'}</p>
 
         <footer class="pedido-base">
           <strong>${moeda(p.total)}</strong>
@@ -177,6 +178,7 @@ document.getElementById('form-novo-pedido').addEventListener('submit', async (e)
       nome: document.getElementById('np-nome').value,
       retiradaEm: document.getElementById('np-retirada').value || null,
       observacao: document.getElementById('np-obs').value || null,
+      formaPagamento: document.getElementById('np-pagamento').value || null,
       itens,
     }),
   });

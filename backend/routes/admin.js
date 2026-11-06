@@ -11,7 +11,7 @@ const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const db = require('../db');
 const requireAdmin = require('../middleware/requireAdmin');
-const { validarRetirada, horariosDaFeira } = require('../config');
+const { validarRetirada, horariosDaFeira, validarFormaPagamento } = require('../config');
 const { salvarBackupPedidos, gerarDadosBackup } = require('../backup');
 
 const COOKIE_ADMIN = {
@@ -123,7 +123,7 @@ router.get('/pedidos/backup', (_req, res) => {
 
 // ---------- CADASTRAR PEDIDO MANUAL (só nome, sem cliente) ----------
 router.post('/pedidos', (req, res) => {
-  const { nome, retiradaEm, observacao, itens } = req.body || {};
+  const { nome, retiradaEm, observacao, itens, formaPagamento } = req.body || {};
 
   const nomeFinal = String(nome || '').trim();
   if (!nomeFinal || nomeFinal.length > 80) {
@@ -141,6 +141,9 @@ router.post('/pedidos', (req, res) => {
   }
 
   const obsFinal = observacao ? String(observacao).trim().slice(0, 500) || null : null;
+
+  const pagamento = validarFormaPagamento(formaPagamento);
+  if (!pagamento.ok) return res.status(400).json({ erro: pagamento.motivo });
 
   if (!Array.isArray(itens) || !itens.length) {
     return res.status(400).json({ erro: 'Adicione pelo menos um produto.' });
@@ -181,10 +184,10 @@ router.post('/pedidos', (req, res) => {
   const tx = db.transaction(() => {
     const info = db
       .prepare(`
-        INSERT INTO pedidos (codigo, cliente_id, cliente_nome, tipo, retirada_em, observacao, total)
-        VALUES (?, NULL, ?, ?, ?, ?, ?)
+        INSERT INTO pedidos (codigo, cliente_id, cliente_nome, tipo, retirada_em, observacao, forma_pagamento, total)
+        VALUES (?, NULL, ?, ?, ?, ?, ?, ?)
       `)
-      .run(codigo, nomeFinal, tipo, retirada, obsFinal, total);
+      .run(codigo, nomeFinal, tipo, retirada, obsFinal, pagamento.forma, total);
 
     const insItem = db.prepare(`
       INSERT INTO pedido_itens (pedido_id, produto_id, quantidade, preco_unitario)
@@ -203,7 +206,7 @@ router.post('/pedidos', (req, res) => {
   salvarBackupPedidos(); // backup automático (não derruba a resposta se falhar)
 
   const pedidoCriado = db
-    .prepare('SELECT id, codigo, tipo, status, retirada_em, observacao, total, criado_em, cliente_nome FROM pedidos WHERE id = ?')
+    .prepare('SELECT id, codigo, tipo, status, retirada_em, observacao, forma_pagamento, total, criado_em, cliente_nome FROM pedidos WHERE id = ?')
     .get(pedidoId);
 
   res.status(201).json({
@@ -223,7 +226,7 @@ router.get('/pedidos', (req, res) => {
   if (status && STATUS_VALIDOS.includes(status)) {
     pedidos = db
       .prepare(`
-        SELECT p.id, p.codigo, p.tipo, p.status, p.retirada_em, p.observacao, p.total,
+        SELECT p.id, p.codigo, p.tipo, p.status, p.retirada_em, p.observacao, p.forma_pagamento, p.total,
                p.criado_em, p.cliente_nome, c.nome AS cliente, c.telefone
         FROM pedidos p LEFT JOIN clientes c ON c.id = p.cliente_id
         WHERE p.status = ?
@@ -233,7 +236,7 @@ router.get('/pedidos', (req, res) => {
   } else {
     pedidos = db
       .prepare(`
-        SELECT p.id, p.codigo, p.tipo, p.status, p.retirada_em, p.observacao, p.total,
+        SELECT p.id, p.codigo, p.tipo, p.status, p.retirada_em, p.observacao, p.forma_pagamento, p.total,
                p.criado_em, p.cliente_nome, c.nome AS cliente, c.telefone
         FROM pedidos p LEFT JOIN clientes c ON c.id = p.cliente_id
         ORDER BY p.status <> 'aberto', p.retirada_em IS NULL, p.retirada_em, p.id DESC

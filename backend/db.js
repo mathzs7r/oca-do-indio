@@ -50,6 +50,10 @@ function init() {
       db.exec("ALTER TABLE pedidos ADD COLUMN cliente_nome TEXT");
       console.log('Coluna cliente_nome adicionada em pedidos.');
     }
+    if (!colunasPedidos.includes('forma_pagamento')) {
+      db.exec("ALTER TABLE pedidos ADD COLUMN forma_pagamento TEXT");
+      console.log('Coluna forma_pagamento adicionada em pedidos.');
+    }
     const temSessoes = db
       .prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='sessoes'")
       .get();

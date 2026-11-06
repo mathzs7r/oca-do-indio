@@ -56,6 +56,16 @@
         <label for="np-obs">Observação (opcional)</label>
         <input id="np-obs" type="text" maxlength="500" placeholder="Ex.: tirar cebola">
       </div>
+      <div class="campo">
+        <label for="np-pagamento">Forma de pagamento</label>
+        <select id="np-pagamento" required>
+          <option value="">Escolha a forma de pagamento…</option>
+          <option value="Pix">Pix</option>
+          <option value="Dinheiro">Dinheiro</option>
+          <option value="Cartão de débito">Cartão de débito</option>
+          <option value="Cartão de crédito">Cartão de crédito</option>
+        </select>
+      </div>
       <p id="np-msg" class="np-msg" role="status"></p>
       <button type="submit" class="btn-mini">Cadastrar pedido</button>
     </form>

@@ -108,3 +108,4 @@ footer{margin-top:auto}
 .item-linha select{flex:1}
 .item-linha input{width:90px}
 .np-msg{margin:8px 0;color:var(--mata-escuro);font-weight:700;min-height:1.2em}
+.pagamento{margin-top:8px;font-weight:700;color:var(--mata-escuro)}
